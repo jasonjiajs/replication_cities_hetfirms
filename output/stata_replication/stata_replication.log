@@ -1,0 +1,322 @@
+------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\jasonjia\Dropbox\projects\replication_cities_hetfirms\output\stata_replication\stata_replication.log
+  log type:  text
+ opened on:   1 Mar 2023, 16:10:47
+
+. 
+. // Data sources
+. // 1. Exports: https://www.trade.gov/data-visualization/metropolitan-export-map 
+. // → All MSA Exports Map (2012 - 2021) → Choose a format to download 
+. // → Crosstab → Table, csv → Download
+. 
+. // 2. Population: https://www.census.gov/data/tables/time-series/demo/popest/2010s-total-metro-and-micro-statistical-areas.html
+. // → Annual Estimates of the Resident Population: April 1, 2010 to July 1, 2019 
+. // → Metropolitan Statistical Area; and for Puerto Rico [<1.0 MB]
+. 
+. // 3. MSA Crosswalk: https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html
+. // → Core based statistical areas (CBSAs), metropolitan divisions, and combined statistical areas (CSAs) 
+. // → Feb. 2013 [<1.0 MB]
+. // → resaved as .csv file
+. 
+. // 4. Sales: https://www.census.gov/data/datasets/2012/econ/census/2012-core-reports.html
+. // → Geographic Area Series → All Geographies 
+. // → ec1200a1.zip
+. 
+. // Exports
+. frame create exports
+
+. frame change exports
+
+. import delimited "data\exports_ita.csv", varnames(1) clear 
+(encoding automatically selected: UTF-8)
+(12 vars, 402 obs)
+
+. rename msafullname msa_name 
+
+. rename v3 exports_2012
+
+. keep msa_name exports_2012
+
+. drop if missing(exports_2012)
+(30 observations deleted)
+
+. drop if _n >= _N - 1 // drop non-data rows
+(2 observations deleted)
+
+. replace msa_name = strtrim(msa_name)
+(0 real changes made)
+
+. 
+. // Population
+. frame create pop
+
+. frame change pop
+
+. import excel "data\cbsa-met-est2019-annres.xlsx", sheet("CBSA-MET-EST2019-ANNRES") clear
+(13 vars, 437 obs)
+
+. rename A msa_name
+
+. rename F pop_2012
+
+. drop if _n <= 6 | _n >= _N - 4 // drop non-data rows
+(11 observations deleted)
+
+. keep msa_name pop_2012
+
+. drop if missing(pop_2012)
+(1 observation deleted)
+
+. drop if strmatch(msa_name, "*Metro Division*") // we only want MSAs, not Metro Divisions
+(31 observations deleted)
+
+. replace msa_name = strtrim(msa_name)
+(0 real changes made)
+
+. replace msa_name = subinstr(msa_name, ".", "", 1)
+(394 real changes made)
+
+. replace msa_name = subinstr(msa_name, "Metro Area", "", .) 
+(392 real changes made)
+
+. replace msa_name = strtrim(msa_name)
+(392 real changes made)
+
+. replace msa_name = subinstr(msa_name, "Mayagüez, PR", "Mayaguez, PR", .) 
+(1 real change made)
+
+. replace msa_name = subinstr(msa_name, "Nashville-Davidson--Murfreesboro--Franklin, TN", "Nashville-Davidson-Murfreesboro-Franklin,
+>  TN", .) 
+(1 real change made)
+
+. replace msa_name = subinstr(msa_name, "San Germán, PR", "San German, PR", .) 
+(1 real change made)
+
+. replace msa_name = subinstr(msa_name, "San Juan-Bayamón-Caguas, PR", "San Juan-Bayamon-Caguas, PR", .) 
+(1 real change made)
+
+. replace msa_name = subinstr(msa_name, "Scranton--Wilkes-Barre, PA", "Scranton-Wilkes-Barre, PA", .) 
+(1 real change made)
+
+. 
+. // Merge population with exports
+. frlink 1:1 msa_name, frame(exports)
+  (31 observations in frame pop unmatched)
+
+. frget exports_2012, from(exports)
+(31 missing values generated)
+  (1 variable copied from linked frame)
+
+. drop exports
+
+. drop if missing(exports_2012)
+(31 observations deleted)
+
+. 
+. // MSA crosswalk (MSA code -> MSA name)
+. frame create msa_crosswalk
+
+. frame change msa_crosswalk
+
+. import delimited "data\msa_crosswalk.csv"
+(encoding automatically selected: UTF-8)
+(12 vars, 1,888 obs)
+
+. rename v5 metro_or_micro
+
+. drop if metro_or_micro != "Metropolitan Statistical Area"
+(652 observations deleted)
+
+. rename v1 msa
+
+. rename v4 msa_name
+
+. keep msa msa_name
+
+. drop if missing(msa)
+(0 observations deleted)
+
+. drop if missing(msa_name)
+(0 observations deleted)
+
+. destring msa, replace
+msa: all characters numeric; replaced as long
+
+. replace msa_name = strtrim(msa_name)
+(0 real changes made)
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(848 observations deleted)
+
+. 
+. // Sales
+. frame create sales
+
+. frame change sales
+
+. import delimited "data\EC1200A1.dat"
+(encoding automatically selected: ISO-8859-1)
+(42 vars, 11,495,168 obs)
+
+. keep msa rcptot naics2012 naics2012_ttl
+
+. drop if naics2012 != "31-33" // Keep only manufacturing sales
+(11,478,851 observations deleted)
+
+. bysort msa: egen sales_2012 = total(rcptot) // Get total manufacturing sales per MSA
+
+. replace sales_2012 = sales_2012 * 1000 // reported sales is in thousands
+(16,064 real changes made)
+
+. keep msa sales_2012 
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(15,388 observations deleted)
+
+. drop if sales_2012 == 0
+(61 observations deleted)
+
+. 
+. // Merge sales with msa_crosswalk
+. frlink 1:1 msa, frame(msa_crosswalk)
+  (483 observations in frame sales unmatched)
+
+. frget msa_name, from(msa_crosswalk)
+(483 missing values generated)
+  (1 variable copied from linked frame)
+
+. drop msa_crosswalk
+
+. drop if missing(msa_name)
+(483 observations deleted)
+
+. 
+. // Merge sales with population and exports
+. frlink 1:1 msa_name, frame(pop)
+  (66 observations in frame sales unmatched)
+
+. frget pop_2012 exports_2012, from(pop)
+(66 missing values generated)
+(66 missing values generated)
+  (2 variables copied from linked frame)
+
+. gen export_intensity_2012 = exports_2012 / sales_2012
+(66 missing values generated)
+
+. drop pop
+
+. drop if missing(pop_2012)
+(66 observations deleted)
+
+. 
+. // Filter for pop and exports
+. keep if pop_2012 >= 100000
+(21 observations deleted)
+
+. keep if exports_2012 >= 0
+(0 observations deleted)
+
+. 
+. // Table 1
+. gen pop_2012_thousand = pop_2012 / 1000
+
+. summarize pop_2012_thousand, detail
+
+                      pop_2012_thousand
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      101.788        100.311
+ 5%      113.281        101.663
+10%      124.559        101.788       Obs                 298
+25%      153.265        101.833       Sum of wgt.         298
+
+50%     262.3375                      Mean           733.9892
+                        Largest       Std. dev.      1686.496
+75%      595.585       6644.559
+90%     1605.741        9528.09       Variance        2844268
+95%     2754.637       13013.44       Skewness       6.792655
+99%      9528.09       19149.69       Kurtosis        61.8596
+
+. est clear
+
+. estpost tabstat pop_2012_thousand, c(stat) stat(n mean p25 p50 p75 p90 p95)
+
+Summary statistics: count mean p25 p50 p75 p90 p95
+     for variables: pop_2012_thousand
+
+             |  e(count)    e(mean)     e(p25)     e(p50)     e(p75)     e(p90)     e(p95) 
+-------------+-----------------------------------------------------------------------------
+pop_2012_t~d |       298   733.9892    153.265   262.3375    595.585   1605.741   2754.637 
+
+. esttab using "output\stata_replication\table1.tex", replace ////
+>         cells("count mean p25 p50 p75 p90 p95") nonumber ///
+>         nomtitle nonote noobs label booktabs ///
+>         collabels("Obs." "Mean" "25th" "50th" "75th" "90th" "95th")
+(output written to output\stata_replication\table1.tex)
+
+.   
+. // Table 2
+. summarize export_intensity_2012, detail
+
+                    export_intensity_2012
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     .0084755       .0076708
+ 5%     .0180447       .0081065
+10%     .0233608       .0084755       Obs                 298
+25%     .0344462       .0102723       Sum of wgt.         298
+
+50%      .065128                      Mean            .147634
+                        Largest       Std. dev.       .542702
+75%     .1140632       1.485188
+90%     .2023926       1.645707       Variance       .2945255
+95%     .3533131       4.719518       Skewness       11.30984
+99%     1.645707       7.710537       Kurtosis       144.8275
+
+. est clear
+
+. estpost tabstat export_intensity_2012, c(stat) stat(n mean p25 p50 p75 p90 p95)
+
+Summary statistics: count mean p25 p50 p75 p90 p95
+     for variables: export_intensity_2012
+
+             |  e(count)    e(mean)     e(p25)     e(p50)     e(p75)     e(p90)     e(p95) 
+-------------+-----------------------------------------------------------------------------
+export_~2012 |       298    .147634   .0344462    .065128   .1140632   .2023926   .3533131 
+
+. esttab using "output\stata_replication\table2.tex", replace ////
+>         cells("count mean p25 p50 p75 p90 p95") nonumber ///
+>         nomtitle nonote noobs label booktabs ///
+>         collabels("Obs." "Mean" "25th" "50th" "75th" "90th" "95th")
+(output written to output\stata_replication\table2.tex)
+
+. 
+. // Figure 1
+. gen pop_2012_log = log(pop_2012)
+
+. gen export_intensity_2012_log = log(export_intensity_2012)
+
+. scatter export_intensity_2012_log pop_2012_log, msymbol(circle_hollow) ///
+> mcolor(blue) ylab(, nogrid) graphregion(fcolor(white)) ///
+> ylabel(#10) xlabel(#10)|| ///
+> lfit export_intensity_2012_log pop_2012_log, lcolor(red) ///
+> title("United States (sales only from manufacturing industry)") ///
+> xti("log(MSA population)") yti("log(Export intensity)") legend(off)
+
+. graph export "output\stata_replication\figure_1.png", replace
+file output\stata_replication\figure_1.png saved as PNG format
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\jasonjia\Dropbox\projects\replication_cities_hetfirms\output\stata_replication\stata_replication.log
+  log type:  text
+ closed on:   1 Mar 2023, 16:14:40
+------------------------------------------------------------------------------------------------------------------------------------
