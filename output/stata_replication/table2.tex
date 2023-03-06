@@ -1,10 +1,14 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{tabular}{l*{1}{ccccccc}}
+\begin{tabular}{l*{1}{c}}
 \toprule
-                    &        Obs.&        Mean&        25th&        50th&        75th&        90th&        95th\\
+                    &\multicolumn{1}{c}{(1)}         \\
 \midrule
-export\_intensity\_2012&         298&     .147634&    .0344462&     .065128&    .1140632&    .2023926&    .3533131\\
+pop\_2012\_log        &       0.235\sym{***}\\
+                    &      (4.43)         \\
+\addlinespace
+Constant            &      -5.681\sym{***}\\
+                    &     (-8.39)         \\
 \bottomrule
 \end{tabular}
 }

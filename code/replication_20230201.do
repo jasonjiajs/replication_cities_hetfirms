@@ -1,5 +1,5 @@
 // Note: Set working directory to "...\replication_cities_hetfirms" before running this do file.
-cd "C:\Users\jasonjia\Dropbox\projects\replication_cities_hetfirms"
+cd "C:\Users\jasonjia\Dropbox\shared_spaces\Jason-Kilian\replication_cities_hetfirms"
 
 version 17
 ssc install estout, replace
@@ -108,26 +108,23 @@ keep if exports_2012 >= 0
 
 // Table 1
 gen pop_2012_thousand = pop_2012 / 1000
-summarize pop_2012_thousand, detail
+summarize pop_2012_thousand export_intensity_2012, detail
 est clear
-estpost tabstat pop_2012_thousand, c(stat) stat(n mean p25 p50 p75 p90 p95)
+estpost tabstat pop_2012_thousand export_intensity_2012, c(stat) stat(n mean p25 p50 p75 p90 p95)
 esttab using "output\stata_replication\table1.tex", replace ////
 	cells("count mean p25 p50 p75 p90 p95") nonumber ///
 	nomtitle nonote noobs label booktabs ///
 	collabels("Obs." "Mean" "25th" "50th" "75th" "90th" "95th")
   
 // Table 2
-summarize export_intensity_2012, detail
-est clear
-estpost tabstat export_intensity_2012, c(stat) stat(n mean p25 p50 p75 p90 p95)
-esttab using "output\stata_replication\table2.tex", replace ////
-	cells("count mean p25 p50 p75 p90 p95") nonumber ///
-	nomtitle nonote noobs label booktabs ///
-	collabels("Obs." "Mean" "25th" "50th" "75th" "90th" "95th")
-
-// Figure 1
 gen pop_2012_log = log(pop_2012)
 gen export_intensity_2012_log = log(export_intensity_2012)
+est clear
+regress export_intensity_2012_log pop_2012_log
+esttab using "output\stata_replication\table2.tex", replace ////
+	nomtitle nonote noobs label booktabs ///
+
+// Figure 1
 scatter export_intensity_2012_log pop_2012_log, msymbol(circle_hollow) ///
 mcolor(blue) ylab(, nogrid) graphregion(fcolor(white)) ///
 ylabel(#10) xlabel(#10)|| ///

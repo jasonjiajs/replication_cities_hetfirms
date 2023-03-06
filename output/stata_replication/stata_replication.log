@@ -1,8 +1,9 @@
 ------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:\Users\jasonjia\Dropbox\projects\replication_cities_hetfirms\output\stata_replication\stata_replication.log
+       log:  C:\Users\jasonjia\Dropbox\shared_spaces\Jason-Kilian\replication_cities_hetfirms\output\stata_replication\stata_replica
+> tion.log
   log type:  text
- opened on:   1 Mar 2023, 16:10:47
+ opened on:   2 Mar 2023, 15:14:19
 
 . 
 . // Data sources
@@ -227,7 +228,7 @@ Duplicates in terms of all variables
 . // Table 1
 . gen pop_2012_thousand = pop_2012 / 1000
 
-. summarize pop_2012_thousand, detail
+. summarize pop_2012_thousand export_intensity_2012, detail
 
                       pop_2012_thousand
 -------------------------------------------------------------
@@ -243,27 +244,6 @@ Duplicates in terms of all variables
 90%     1605.741        9528.09       Variance        2844268
 95%     2754.637       13013.44       Skewness       6.792655
 99%      9528.09       19149.69       Kurtosis        61.8596
-
-. est clear
-
-. estpost tabstat pop_2012_thousand, c(stat) stat(n mean p25 p50 p75 p90 p95)
-
-Summary statistics: count mean p25 p50 p75 p90 p95
-     for variables: pop_2012_thousand
-
-             |  e(count)    e(mean)     e(p25)     e(p50)     e(p75)     e(p90)     e(p95) 
--------------+-----------------------------------------------------------------------------
-pop_2012_t~d |       298   733.9892    153.265   262.3375    595.585   1605.741   2754.637 
-
-. esttab using "output\stata_replication\table1.tex", replace ////
->         cells("count mean p25 p50 p75 p90 p95") nonumber ///
->         nomtitle nonote noobs label booktabs ///
->         collabels("Obs." "Mean" "25th" "50th" "75th" "90th" "95th")
-(output written to output\stata_replication\table1.tex)
-
-.   
-. // Table 2
-. summarize export_intensity_2012, detail
 
                     export_intensity_2012
 -------------------------------------------------------------
@@ -282,27 +262,52 @@ pop_2012_t~d |       298   733.9892    153.265   262.3375    595.585   1605.741 
 
 . est clear
 
-. estpost tabstat export_intensity_2012, c(stat) stat(n mean p25 p50 p75 p90 p95)
+. estpost tabstat pop_2012_thousand export_intensity_2012, c(stat) stat(n mean p25 p50 p75 p90 p95)
 
 Summary statistics: count mean p25 p50 p75 p90 p95
-     for variables: export_intensity_2012
+     for variables: pop_2012_thousand export_intensity_2012
 
              |  e(count)    e(mean)     e(p25)     e(p50)     e(p75)     e(p90)     e(p95) 
 -------------+-----------------------------------------------------------------------------
+pop_2012_t~d |       298   733.9892    153.265   262.3375    595.585   1605.741   2754.637 
 export_~2012 |       298    .147634   .0344462    .065128   .1140632   .2023926   .3533131 
 
-. esttab using "output\stata_replication\table2.tex", replace ////
+. esttab using "output\stata_replication\table1.tex", replace ////
 >         cells("count mean p25 p50 p75 p90 p95") nonumber ///
 >         nomtitle nonote noobs label booktabs ///
 >         collabels("Obs." "Mean" "25th" "50th" "75th" "90th" "95th")
-(output written to output\stata_replication\table2.tex)
+(output written to output\stata_replication\table1.tex)
 
-. 
-. // Figure 1
+.   
+. // Table 2
 . gen pop_2012_log = log(pop_2012)
 
 . gen export_intensity_2012_log = log(export_intensity_2012)
 
+. est clear
+
+. regress export_intensity_2012_log pop_2012_log
+
+      Source |       SS           df       MS      Number of obs   =       298
+-------------+----------------------------------   F(1, 296)       =     19.67
+       Model |  16.9964337         1  16.9964337   Prob > F        =    0.0000
+    Residual |  255.817926       296  .864249749   R-squared       =    0.0623
+-------------+----------------------------------   Adj R-squared   =    0.0591
+       Total |  272.814359       297  .918566867   Root MSE        =    .92965
+
+------------------------------------------------------------------------------
+export_int~g | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+pop_2012_log |   .2347774   .0529416     4.43   0.000     .1305878     .338967
+       _cons |  -5.680733   .6771341    -8.39   0.000     -7.01334   -4.348126
+------------------------------------------------------------------------------
+
+. esttab using "output\stata_replication\table2.tex", replace ////
+>         nomtitle nonote noobs label booktabs ///
+> 
+(output written to output\stata_replication\table2.tex)
+
+. // Figure 1
 . scatter export_intensity_2012_log pop_2012_log, msymbol(circle_hollow) ///
 > mcolor(blue) ylab(, nogrid) graphregion(fcolor(white)) ///
 > ylabel(#10) xlabel(#10)|| ///
@@ -316,7 +321,8 @@ file output\stata_replication\figure_1.png saved as PNG format
 . 
 . log close
       name:  <unnamed>
-       log:  C:\Users\jasonjia\Dropbox\projects\replication_cities_hetfirms\output\stata_replication\stata_replication.log
+       log:  C:\Users\jasonjia\Dropbox\shared_spaces\Jason-Kilian\replication_cities_hetfirms\output\stata_replication\stata_replica
+> tion.log
   log type:  text
- closed on:   1 Mar 2023, 16:14:40
+ closed on:   2 Mar 2023, 15:18:05
 ------------------------------------------------------------------------------------------------------------------------------------
