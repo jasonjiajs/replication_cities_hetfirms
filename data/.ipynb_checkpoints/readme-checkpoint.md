@@ -2,7 +2,8 @@
 
 ## 1. Exports
 - https://www.trade.gov/data-visualization/metropolitan-export-map 
-- → All MSA Exports Map (2012 - 2021) → Choose a format to download → Crosstab → Table, csv → Download
+- → All MSA Exports Map (2012 - 2021) → Choose a format to download 
+- → Crosstab → Table, csv → Download
 
 ## 2. Population
 - https://www.census.gov/data/tables/time-series/demo/popest/2010s-total-metro-and-micro-statistical-areas.html
@@ -12,16 +13,15 @@
 ## 3. MSA Crosswalk
 - https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html
 - → Core based statistical areas (CBSAs), metropolitan divisions, and combined statistical areas (CSAs) 
-- → Feb. 2013 [<1.0 MB]
-- → resaved as .csv file
+- → Feb. 2013 [<1.0 MB] → resaved as .csv file
 
 ## 4. Sales
 - https://www.census.gov/data/datasets/2012/econ/census/2012-core-reports.html
 - → Geographic Area Series → All Geographies → ec1200a1.zip
 
-## 5. Land area: https://www2.census.gov/geo/tiger/TIGER2012/CBSA/
+## 5. Land area
 - https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2012.html#list-tab-790442341 (TIGER/Line Shapefiles, 2012) 
-- → FTP Archive → CBSA/ → tl_2012_us_cbsa.zip
+- → FTP Archive → CBSA/ → tl_2012_us_cbsa.zip (https://www2.census.gov/geo/tiger/TIGER2012/CBSA/)
 - Documentation: https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation/tiger-geo-line.2012.html#list-tab-240499709 (TIGER/Line Shapefiles and TIGER/Line Files Technical Documentation → 2012 → Chapter 5 - Geographic Shapefile Concepts Overview [<1.0 MB] (https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2012/TGRSHP2012_TechDoc_Ch5.pdf)
 - Not used, only for reference: Cartographic Boundary Files - Shapefiles, https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
 - Units for land area is square meters: https://www.census.gov/quickfacts/fact/note/US/LND110210

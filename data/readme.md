@@ -2,7 +2,8 @@
 
 ## 1. Exports
 - https://www.trade.gov/data-visualization/metropolitan-export-map 
-- → All MSA Exports Map (2012 - 2021) → Choose a format to download → Crosstab → Table, csv → Download
+- → All MSA Exports Map (2012 - 2021) → Choose a format to download 
+- → Crosstab → Table, csv → Download
 
 ## 2. Population
 - https://www.census.gov/data/tables/time-series/demo/popest/2010s-total-metro-and-micro-statistical-areas.html
